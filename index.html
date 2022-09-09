@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="file" name="fileToUpload" id="fileToUpload" />
+    <button>Send</button>
+    <progress id="file" value="0" max="1">0%</progress>
+
+    <script>
+      const sendButton = document.querySelector("button"); // select send button element
+      const input = document.querySelector('input[type="file"]'); // Select input file element
+      const progressBar = document.querySelector("progress"); // Select Progress Bar element
+
+      //add event listener click on send button
+      sendButton.addEventListener("click", () => {
+        upload(input.files[0]); // call upload function and set attribute to input.file[0];
+      });
+
+      function upload(myData) {
+        // create form data
+        var form_data = new FormData();
+        //append here out file and set name fileToUpload to call it later on php file.
+        form_data.append("fileToUpload", myData);
+        axios
+          .request({
+            method: "post", // send it via post request.
+            url: "upload.php", // set the php file with upload code.
+            data: form_data, // as data we set the form data see lines (26 & 28).
+            // onUploadProgess this is axios method and while file uploaded to the server this function return us a event (e)
+            //from this event we need the (e.loaded) the bytes who uploaded to the server and divide it by the acctualy file size.
+            //when number e.loaded will be the same with the acctual file size, this is will be for example 100kb/100kb = 1.
+            //number when number is 1 this is means file uploaded if you want to get this is in percent just delete the comment at line 41.
+            onUploadProgress: (e) => {
+              progressBar.value = e.loaded / e.total;
+              //console.log(e.loaded / e.total); // show us the upload progress from 0 to 1. (1=100%). comment this and uncomment the line 41 if you want it from 0 to 100.
+              console.log((e.loaded / e.total)*100); //delete this comment if you want the percent from 0 to 100.
+            },
+          })
+          .then((data) => {
+            console.log(data.data); // when the upload ends we catch the message from php.
+          });
+      }
+    </script>
+  </body>
+</html>
